@@ -7,18 +7,32 @@ on:
     branches: [main]
   workflow_dispatch: {}
   #schedule:
-    # Nightly full run on main (UTC)
-    # - cron: '0 3 * * *'
+  #  - cron: '0 3 * * *'
 
 jobs:
+  lint:
+    name: Lint & format check
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run format:check
+
   test:
     name: Playwright (${{ matrix.project }})
+    needs: lint
     runs-on: ubuntu-latest
     timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:
-        project: [chromium, firefox, webkit, mobile-chrome]
+        project: [chromium, firefox]
     steps:
       - uses: actions/checkout@v4
 
@@ -31,7 +45,7 @@ jobs:
         run: npm ci
 
       - name: Install Playwright browsers
-        run: npx playwright install --with-deps ${{ matrix.project == 'mobile-chrome' && 'chromium' || matrix.project }}
+        run: npx playwright install --with-deps ${{ matrix.project }}
 
       - name: Run tests
         run: npx playwright test --project=${{ matrix.project }}

@@ -1,13 +1,6 @@
 import { Page } from '@playwright/test';
 
-/**
- * Catawiki shows a GDPR cookie consent banner on first visit (EU site).
- * If we don't dismiss it, clicks on the page can be intercepted.
- *
- * The banner UI may change over time, so we try a few resilient strategies
- * in order. We treat its absence as a non-error: it's already been dismissed
- * or wasn't shown on this run.
- */
+/** Dismisses Catawiki's cookie banner if shown. Absence is treated as a no-op. */
 export async function acceptCookiesIfPresent(page: Page, timeoutMs = 3_000): Promise<void> {
   const candidates = [
     page.getByRole('button', { name: /accept all/i }),
@@ -23,8 +16,7 @@ export async function acceptCookiesIfPresent(page: Page, timeoutMs = 3_000): Pro
       await candidate.first().click();
       return;
     } catch {
-      // Try the next strategy
+      // try next strategy
     }
   }
-  // No banner found — fine, continue.
 }
