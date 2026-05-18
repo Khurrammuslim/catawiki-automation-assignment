@@ -8,7 +8,7 @@ on:
   workflow_dispatch: {}
   schedule:
     # Nightly full run on main (UTC)
-    - cron: '0 3 * * *'
+    # - cron: '0 3 * * *'
 
 jobs:
   test:
